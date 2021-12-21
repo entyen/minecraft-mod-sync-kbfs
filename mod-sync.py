@@ -22,6 +22,13 @@ def get_elem_safe(arr, ind):
 keybase_name = get_elem_safe(parse_args(), 0) or 'regul'
 mods_url = f'https://keybase.pub/{keybase_name}/docs/mods/'
 
+if os.name == 'nt':
+  slash = '\\'
+  mc_path = os.path.expandvars("%appdata%")
+else: 
+  slash = '/'
+  mc_path = os.path.expanduser("~")
+
 def parse_html():
   global mods_url
   html = urllib.request.urlopen(mods_url).read().decode("utf-8")
@@ -58,22 +65,22 @@ def clear(path):
   print(f'Clearing directory {path}')
   for f in os.listdir(path):
     try:
-      os.remove(path + '/' + f)
+      os.remove(path + slash + f)
     except:
-      rmtree(path + '/' + f)
+      rmtree(path + slash + f)
 
 def synchronize(path0, path1):
   print('Starting sync')
 
   if (get_diff(path0, path1)):
     clear(path1)
-    [ copy(path0 + '/' + f, path1 + '/' + f) for f in os.listdir(path0) ]
+    [ copy(path0 + slash + f, path1 + slash + f) for f in os.listdir(path0) ]
     print('Synchronized successfully')
   else: print('Up to date - exit')
 
 def main():
-  local_path = f'{get_elem_safe(parse_args(), 1) or "./data"}'
-  target_path = f'{get_elem_safe(parse_args(), 2) or os.path.expanduser("~") + "/.minecraft/mods"}'
+  local_path = f'{get_elem_safe(parse_args(), 1) or "." + slash + "data"}'
+  target_path = f'{get_elem_safe(parse_args(), 2) or mc_path + slash + ".minecraft" + slash + "mods"}'
   if not os.path.exists(local_path):
     print('Creating data directory')
     os.mkdir(local_path)
@@ -83,4 +90,3 @@ def main():
 
 if __name__ == '__main__':
   main()
-
