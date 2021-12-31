@@ -45,6 +45,13 @@ def parse_html():
   return res
 
 #                 urls string[]
+def progress(percent=0, width=30):
+    left = width * percent // 100
+    right = width - left
+    print('\r[', '#' * left, ' ' * right, ']',
+          f' {percent:.0f}%',
+          sep='', end='', flush=True)
+
 def download_mods(urls, local_path, target_path):
   global keybase_name
   rg0 = re.compile(f'{keybase_name}\/')
@@ -64,6 +71,7 @@ def download_mods(urls, local_path, target_path):
     procs.append(p)
 
   while True in [p.is_alive() for p in procs]:
+    progress(threading.active_count(), len(urls))
     time.sleep(0.25)
   print('Files downloaded')
   synchronize(local_path, target_path)
