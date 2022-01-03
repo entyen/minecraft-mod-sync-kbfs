@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import urllib.request
+import contextlib
 import os
 import re
 import getopt
@@ -45,12 +46,25 @@ def parse_html():
   return res
 
 #                 urls string[]
-def progress(percent=0, width=30):
-    left = width * percent // 100
-    right = width - left
-    print('\r[', '#' * left, ' ' * right, ']',
-          f' {percent:.0f}%',
-          sep='', end='', flush=True)
+def progress(count, total, status=''):
+    bar_len = 60
+    filled_len = int(round(bar_len * count / float(total)))
+
+    percents = round(100.0 * count / float(total), 1)
+    bar = '=' * filled_len + '-' * (bar_len - filled_len)
+
+    sys.stdout.write('[%s] %s%s %s\r' % (bar, percents, '%', status))
+    sys.stdout.flush()
+
+def dowlnoad_urlm(url, filename):
+  with open(filename, 'wb') as out_file:
+    with contextlib.closing(urllib.request.urlopen(url)) as fp:
+        block_size = 1024 * 8
+        while True:
+            block = fp.read(block_size)
+            if not block:
+                break
+            out_file.write(block)
 
 def download_mods(urls, local_path, target_path):
   global keybase_name
@@ -66,12 +80,14 @@ def download_mods(urls, local_path, target_path):
     download_url = url.replace(''.join(rg1.findall(url)),'://' + download_name) + '?dl=1'
     filename = url[30:]
     print(f'Downloading {filename}')
-    p = threading.Thread(target=urllib.request.urlretrieve, args=(download_url, f'./{local_path}/{filename}'))
+    p = threading.Thread(target=dowlnoad_urlm, args=(download_url, f'./{local_path}/{filename}'))
     p.start()
     procs.append(p)
 
   while True in [p.is_alive() for p in procs]:
-    progress(threading.active_count(), len(urls))
+    nconv = int(p.name.split('-')[1].split(' ')[0])
+    sum = len(threading.enumerate()) - (nconv - len(procs))
+    progress(len(procs) - sum, len(procs))
     time.sleep(0.25)
   print('Files downloaded')
   synchronize(local_path, target_path)
