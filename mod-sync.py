@@ -7,7 +7,6 @@ import getopt
 import sys
 import time
 import threading
-import requests
 import ctypes
 from shutil import copy, rmtree
 from checksumdir import dirhash
@@ -84,9 +83,9 @@ def download_mods(urls, local_path, target_path):
     p.start()
     procs.append(p)
 
+  maxThread = threading.active_count()
   while True in [p.is_alive() for p in procs]:
-    nconv = int(p.name.split('-')[1].split(' ')[0])
-    sum = len(threading.enumerate()) - (nconv - len(procs))
+    sum = len(threading.enumerate()) - (maxThread - len(procs))
     progress(len(procs) - sum, len(procs))
     time.sleep(0.25)
   print('Files downloaded')
